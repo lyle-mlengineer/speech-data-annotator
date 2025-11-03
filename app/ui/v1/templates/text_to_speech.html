@@ -1,0 +1,85 @@
+{%extends "_base.html" %} 
+
+    {% block styles %}
+        {{ super() }} {# This includes the CSS from the parent's 'styles' block #}
+        <link rel="stylesheet" href="{{ url_for('static', path='css/generator.css') }}">
+    {% endblock %}
+
+{%block content%}
+
+            <div class="gen-container">
+
+         <header class="header__gen">
+
+            <div class="logo-wrapper">
+               <div class="gen__logo">
+                  <i class="fa-solid fa-wand-magic-sparkles"></i>
+               </div>
+               <h1>AI Audio Generator</h1>
+            </div>
+
+            <button class="theme-toggle">
+               <i class="fa-solid fa-moon"></i>
+            </button>
+
+         </header>
+
+         <div class="main-content">
+
+            <form action="#" class="prompt-form">
+               <!--Prompt container-->
+               <div class="prompt-container">
+                  <textarea placeholder="Describe your idea in detail..." name="" id="" class="prompt-input" required
+                     autofocus></textarea>
+
+                  <button class="prompt-btn" type="button">
+                     <i class="fa-solid fa-dice"></i>
+                  </button>
+               </div>
+
+               <!--Prompt actions-->
+               <div class="prompt-actions">
+
+                  <div class="select-wrapper">
+                     <select name="" id="" class="custom-select" required>
+                        <option value="" selected disabled>Language</option>
+                        <option value="swahili">Swahili</option>
+                        <option value="english">English</option>
+                        <option value="sheng">Sheng'</option>
+                        <option value="luo">Luo</option>
+                     </select>
+                  </div>
+
+                  <div class="select-wrapper">
+                     <select name="" id="" class="custom-select" required>
+                        <option value="" selected disabled>Gender</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                     </select>
+                  </div>
+
+                  <div class="select-wrapper">
+                     <select name="" id="" class="custom-select" required>
+                        <option value="" selected disabled>Voice</option>
+                        <option value="lyle">Lyle</option>
+                        <option value="mary">Mary</option>
+                     </select>
+                  </div>
+
+                  <button class="generate-btn" type="submit">
+                     <i class="fa-solid fa-wand-sparkles"></i>
+                     Generate
+                  </button>
+
+               </div>
+
+               <!--Results-->
+               <div class="audio-output">
+                  <audio src="audio/audio.mp3" controls></audio>
+               </div>
+
+            </form>
+
+         </div>
+
+{% endblock %}

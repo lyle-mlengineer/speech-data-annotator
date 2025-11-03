@@ -1,0 +1,32 @@
+services:
+  db:
+    image: postgres
+    container_name: db
+    # restart: always
+    environment:
+      POSTGRES_USER: lyle
+      POSTGRES_PASSWORD: lyle
+      POSTGRES_DB: lyle
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  cache:
+    image: redis
+    container_name: cache
+    # restart: always
+    ports:
+      - "6379:6379"
+
+  # web:
+  #   build: .
+  #   ports:
+  #     - "8000:8000"
+  #   environment:
+  #     - DB_USER=admin
+  #     - DB_PASSWORD=secret
+  #     - DB_NAME=test.db
+
+volumes:
+  db_data:

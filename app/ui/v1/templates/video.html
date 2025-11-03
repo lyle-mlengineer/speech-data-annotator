@@ -1,0 +1,91 @@
+{%extends "_base.html" %} 
+
+{% block styles %}
+    {{ super() }} {# This includes the CSS from the parent's 'styles' block #}
+    <link rel="stylesheet" href="{{ url_for('static', path='css/extractor.css') }}">
+{% endblock %}
+
+{%block content%}
+
+<div class="main-content">
+
+   <header class="header__gen">
+
+      <div class="logo-wrapper">
+         <div class="gen__logo">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+         </div>
+         <h1>YouTube Timestamps Extractor</h1>
+      </div>
+
+      <button class="theme-toggle">
+         <i class="fa-solid fa-moon"></i>
+      </button>
+
+   </header>
+
+   <div class="extraction-container">
+
+      <form action="/extract" method="post" class="extract-form" id="extract-form">
+
+         <div class="form-inputs">
+
+            <input type="text" id="videourl" name="videourl" placeholder="Enter YouTube Video Link" required>
+            <button type="submit" class="extract-btn">
+               <i class="fa-solid fa-magnifying-glass"></i>
+               Extract Timestamps
+            </button>
+
+         </div>
+
+         <div class="form-controls">
+
+            <div class="select-wrapper">
+               <select name="style" id="style" class="style-select">
+                  <option value="" disabled selected>Select Style</option>
+                  {% for style in all_styles %}
+                     <option value="{{ style }}">{{ style|capitalize }}</option>
+                  {% endfor %}
+               </select>
+            </div>
+
+         </div>
+
+      </form>
+
+      <div class="extraction-results">
+
+         <div class="results" id="results">
+            <!-- Extraction results will be displayed here -->
+
+         </div>
+
+         <div class="controls">
+            <button class="copy-btn" type="button" id="action-copy">
+               <i class="fa-regular fa-copy"></i>
+               Copy Results
+            </button>
+            <a href="" download class="download-link" id="download-link">
+               <!-- Download link will be set dynamically -->
+               <i class="fa-solid fa-download"></i>
+               Download Results
+            </a>
+            <!-- <button class="download-btn" type="button" id="action-download">
+               <i class="fa-solid fa-download"></i>
+               Download Results             
+            </button> -->
+
+         </div>
+
+      </div>
+
+   </div>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+        {{ super() }} {# Optional: to include scripts from the parent block if any #}
+        <script src="{{ url_for('static', path='js/extractor.js') }}"></script>
+{% endblock %}

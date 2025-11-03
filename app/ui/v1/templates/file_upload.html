@@ -1,0 +1,14 @@
+{%extends "_product.html" %} 
+
+{% block styles %}
+    {{ super() }} {# This includes the CSS from the parent's 'styles' block #}
+    <link rel="stylesheet" href="{{ url_for('static', path='css/transcriber.css') }}">
+{% endblock %}
+
+{%block product%}
+<form action="/speech_to_text" method="post" enctype="multipart/form-data">
+    <input type="file" name="uploadedFile">
+    <button type="submit">Upload</button>
+</form>
+
+{% endblock %}

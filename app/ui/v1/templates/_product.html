@@ -1,0 +1,35 @@
+{%extends "_base.html" %} 
+
+{% block styles %}
+   {{ super() }} {# This includes the CSS from the parent's 'styles' block #}
+   <link rel="stylesheet" href="{{ url_for('static', path='css/product.css') }}">
+{% endblock %}
+
+{%block content%}
+
+    <div class="gen-container">
+
+         <header class="header__gen">
+
+            <div class="logo-wrapper">
+               <div class="gen__logo">
+                  <i class="fa-solid fa-wand-magic-sparkles"></i>
+               </div>
+               <h1>Speech Transcription</h1>
+            </div>
+
+            <button class="theme-toggle">
+               <i class="fa-solid fa-moon"></i>
+            </button>
+
+         </header>
+
+         <div class="main-content">
+
+               {% block product %}
+            
+               {% endblock %}
+
+         </div>
+
+{% endblock %}

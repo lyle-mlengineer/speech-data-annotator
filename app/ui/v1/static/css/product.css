@@ -1,0 +1,76 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+:root {
+  --color-primary: #5C56E1;
+  --color-primary-dark: #5b21b6;
+  --color-accent: #8B5CF6;
+  --color-card: #FFFFFF;
+  --color-input: #F1F1FF;
+  --color-text: #09090E;
+  --color-placeholder: #5C5A87;
+  --color-border: #D4D4ED;
+  --color-gradient: linear-gradient(135deg, #5C56E1, #8B5CF6);
+}
+
+.gen-container{
+    width: 100%;
+    padding: 32px;
+    border-radius: 23px;
+    background: var(--color-card);
+    box-shadow: 0 10px 20px 0 rgba(0, 0, 0, 0.1);
+}
+
+.header__gen{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header__gen .logo-wrapper{
+    display: flex;
+    gap: 18px;
+    align-items: center;
+    color: #09090E;
+}
+
+.header__gen .logo-wrapper .gen__logo{
+    height: 55px;
+    width: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-gradient);
+    border-radius: 15px;
+    font-size: 1.35rem;
+    flex-shrink: 0;
+}
+
+.header__gen .logo-wrapper h1{
+    font-size: 1.9rem;
+    font-weight: 700;
+}
+
+.header__gen .theme-toggle{
+    height: 43px;
+    width: 43px;
+    background: var(--color-input);
+    border: var(--color-border);
+    border-radius: 50%;
+    font-size: 1.05rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-placeholder);
+    transition: all 0.3s ease;
+}
+
+.header__gen .theme-toggle:hover{
+    color: var(--color-primary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.main-content{
+    margin: 25px 0 5px;
+}

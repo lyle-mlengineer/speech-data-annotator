@@ -1,0 +1,48 @@
+{%extends "_product.html" %} 
+
+{% block styles %}
+    {{ super() }} {# This includes the CSS from the parent's 'styles' block #}
+    <link rel="stylesheet" href="{{ url_for('static', path='css/transcriber.css') }}">
+{% endblock %}
+
+{%block product%}
+<form action="/api/v1/transcribe" class="prompt-form" method="post" enctype="multipart/form-data">
+               <!--User and Audio details-->
+               <input type="hidden" id="user-id" value="anonymous_user_id" name="user_id" />
+               <input type="hidden" id="audio-id" value="{{ audio_id }}" name="audio_id" />   
+               <!--Results-->
+               <div class="audio-output">
+                  <audio src="{{ audio_src }}" controls></audio>
+               </div>
+
+               <!--Prompt container-->
+               <div class="prompt-container">
+                  <textarea placeholder="Type the audio transcription here..." name="transcription" id="" class="prompt-input" required
+                     autofocus></textarea>
+
+                  <button class="prompt-btn" type="button">
+                     <i class="fa-solid fa-dice"></i>
+                  </button>
+               </div>
+
+               <!--Prompt actions-->
+               <div class="prompt-actions">
+
+                  <div class="select-wrapper">
+                     <select name="language" id="" class="custom-select" required>
+                        <option value="" selected disabled>Language</option>
+                        <option value="swahili">Swahili</option>
+                        <option value="english">English</option>
+                        <option value="sheng">Sheng'</option>
+                        <option value="luo">Luo</option>
+                     </select>
+                  </div>
+
+                  <button class="generate-btn" type="submit">
+                     <i class="fa-solid fa-wand-sparkles"></i>
+                     Submit
+                  </button>
+
+               </div>
+</form>
+{% endblock %}
