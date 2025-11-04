@@ -6,15 +6,6 @@ load_dotenv()
 
 
 class Config(BaseSettings):
-    app_name: str = "SautiFlow Labs"
-    debug: bool = False
-    db_user: str = ""
-    db_password: str = ""
-    db_name: str = "test.db"
-
-    templates_dir: str = "app/ui/v1/templates"
-    static_dir: str = "app/ui/v1/static"
-    
     YOUTUBE_CREDENTIALS_PATH: str = os.getenv(
         "YOUTUBE_CREDENTIALS_PATH", "credentials.json"
     )
@@ -26,8 +17,8 @@ class Config(BaseSettings):
     REDIS_PORT: int = os.environ.get("REDIS_PORT", 6379)
     REDIS_DB: int = os.environ.get("REDIS_DB", 0)
     REDIS_AUDIO_DOWNLOAD_QUEUE: str = os.environ.get("REDIS_AUDIO_DOWNLOAD_QUEUE", "audio_download")
-    CELERY_BROKER_URL: str = os.environ.get("CELERY_BROKER_URL", "redis://127.0.0.1:6379/0")            # NEW
-    CELERY_RESULT_BACKEND: str = os.environ.get("CELERY_RESULT_BACKEND", "redis://127.0.0.1:6379/0")
+    REDIS_AUDIO_SLICE_QUEUE: str = os.environ.get("REDIS_AUDIO_SLICE_QUEUE", "audio_slice")
+    REDIS_AUDIO_UPLOAD_QUEUE: str = os.environ.get("REDIS_AUDIO_UPLOAD_QUEUE", "audio_upload")
 
     @property
     def db_url(self):

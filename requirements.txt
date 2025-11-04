@@ -8,5 +8,9 @@ jinja2
 python-multipart
 tubectrl
 youtube_dl
+redis
+librosa
+celery[redis]
+gevent
 
 # ffprobe and ffmpeg ffplay

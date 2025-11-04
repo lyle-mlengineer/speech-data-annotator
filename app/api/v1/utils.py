@@ -1,6 +1,6 @@
 import json
 import os
-import re
+from fastapi import HTTPException, status
 
 from tubectrl import YouTube
 from tubectrl.models import Video
@@ -8,6 +8,8 @@ from tubectrl.models import Video
 from app.core.config import config as BaseConfig
 from app.api.v1.schema import AudioDetails
 import yt_dlp
+import redis
+from redis.exceptions import ConnectionError
 
 
 def get_youtube(
@@ -36,19 +38,17 @@ def parse_video_id(url: str) -> str:
 
 
 def load_video_details(video_id: str) -> AudioDetails:
-    with open(os.path.join(BaseConfig.DATA_DIR, video_id, f"{video_id}.json"), "r") as f:
+    with open(os.path.join(BaseConfig.DATA_DIR, "metadata", f"{video_id}.json"), "r") as f:
         video_details: AudioDetails = json.load(f)
     return video_details
 
 
 def save_video_details(video_details: AudioDetails) -> None:
-    video_path = os.path.join(BaseConfig.DATA_DIR, video_details.id)
-    if not os.path.exists(video_path):
-        os.makedirs(video_path)
+    metadata_path = os.path.join(BaseConfig.DATA_DIR, "metadata", f"{video_details.id}.json")
     with open(
-        os.path.join(video_path, f"{video_details.id}.json"), "w"
+        metadata_path, "w"
     ) as f:
-        json.dump(video_details.dict(), f, indent=4)
+        json.dump(video_details.model_dump(), f, indent=4)
         
 def find_video(video_id: str, youtube: YouTube) -> Video:
     video: Video = youtube.find_video_by_id(video_id=video_id)
@@ -68,7 +68,8 @@ def parse_video_details(video: Video, video_url: str) -> AudioDetails:
 
 async def get_audio_details(video_url: str) -> AudioDetails:
     video_id: str = parse_video_id(video_url)
-    if os.path.exists(os.path.join(BaseConfig.DATA_DIR, video_id)):
+    metadata_path = os.path.join(BaseConfig.DATA_DIR, "metadata", f"{video_id}.json")
+    if os.path.exists(metadata_path):
         video_details: AudioDetails = load_video_details(video_id)
     else:
         youtube: YouTube = get_youtube()
@@ -77,41 +78,20 @@ async def get_audio_details(video_url: str) -> AudioDetails:
         save_video_details(video_details)
     return video_details
 
-def download_youtube_audio(audio_url: str, output_path: str):
-    """
-    Downloads the audio from a YouTube video.
-
-    Args:
-        url (str): The URL of the YouTube video.
-        output_path (str): The directory where the audio file will be saved.
-    """
-    
+def schedule_audio_download(audio_url: str) -> str:
+    r = redis.Redis(host=BaseConfig.REDIS_HOST, port=BaseConfig.REDIS_PORT, db=BaseConfig.REDIS_DB)
+    quota_exceeded: str = r.hget(name="quota", key="quota_exceeded")
+    if quota_exceeded is not None and quota_exceeded.decode("utf-8") == "true":
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="You have exhausted your daily youtube quota",
+    )
     video_id: str = parse_video_id(audio_url)
-    print(f"Downloading audio for video ID: {video_id}")
-    
-    ydl_opts = {
-        'format': 'bestaudio/best',  # Selects the best audio format
-        'postprocessors': [{
-            'key': 'FFmpegExtractAudio',
-            'preferredcodec': 'mp3',  # Converts to MP3
-            'preferredquality': '192', # Audio quality
-        }],
-        'outtmpl': f'{output_path}/{video_id}.%(ext)s', # Output file name template
-        'noplaylist': True, # Download only the specified video, not a playlist
-    }
-
     try:
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            ydl.download([audio_url])
-        print(f"Audio downloaded successfully from: {audio_url}")
-    except Exception as e:
-        print(f"Error downloading audio: {e}")
-        
-async def download_video_audio(audio_url: str) -> None:
-    audio_id: str = parse_video_id(audio_url)
-    audio_dir: str = os.path.join(BaseConfig.DATA_DIR, audio_id)
-    audio_file_path: str = os.path.join(audio_dir, f"{audio_id}.mp3")
-    if not os.path.exists(audio_file_path):
-        if not os.path.exists(audio_dir):
-            os.makedirs(audio_dir)
-        download_youtube_audio(audio_url, os.path.join(BaseConfig.DATA_DIR, audio_id))
+        data: dict = {"audio_id": video_id, "audio_url": audio_url}
+        audio_dir: str = os.path.join(BaseConfig.DATA_DIR, "raw", video_id)
+        audio_file_path: str = os.path.join(audio_dir, f"{video_id}.mp3")
+        if not os.path.exists(audio_file_path):
+            r.lpush(BaseConfig.REDIS_AUDIO_DOWNLOAD_QUEUE, json.dumps(data))
+    except ConnectionError as e:
+        print(e)
