@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException, Form, Request, status
 from typing import Annotated
 from fastapi.responses import RedirectResponse
 from app.api.v1.schema import AudioDetails
-from app.api.v1.utils import get_audio_details, schedule_audio_download
-from app.core.worker import download_audio_task
+from app.api.v1.utils import get_audio_details
+from app.core.worker import download_audio_task, slice_audio_task
 
 # from app.db.schema import SessionLocal
 # from app.models.user import UserCreate, UserRead
@@ -27,5 +27,6 @@ async def get_audio(audio_url: Annotated[str, Form()], service = Depends(get_aud
 async def download_audio(audio_url: Annotated[str, Form()], service = Depends(get_audio_service)):
     """Dependency to download audio file"""
     audio_details = await get_audio_details(audio_url)
-    download_audio_task.delay(audio_url)
+    # download_audio_task.delay(audio_url)
+    download_audio_task.apply_async((audio_url,), link=slice_audio_task.s())
     return { "message": "Audio download initiated", "details": audio_details }
