@@ -4,6 +4,7 @@ from app.core.config import config
 from app.services.audio_service import AudioService
 from app.services.audio_service import DownloadResult
 import logging
+from app.db.schema import SessionLocal
 
 
 celery = Celery(
@@ -12,7 +13,7 @@ celery = Celery(
     backend=config.CELERY_RESULT_BACKEND
 )
 
-service = AudioService()
+service = AudioService(session=SessionLocal())
 
 
 @celery.task(name='download_audio_task')
@@ -24,5 +25,5 @@ def download_audio_task(audio_url: str) -> int:
 def slice_audio_task(result: DownloadResult) -> None:
     if result:
         logging.info(f"Slicing audio file at: {result['audio_file_path']}")
-        service.slice_audio(result['audio_id'], result['audio_file_path'], result['task_id'])
+        service.slice_audio(result['audio_id'], result['audio_file_path'])
     return None

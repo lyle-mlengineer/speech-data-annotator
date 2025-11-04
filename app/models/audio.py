@@ -1,13 +1,6 @@
 from pydantic import BaseModel
+from datetime import datetime
 
-
-class UserCreate(BaseModel):
-    name: str
-
-
-class UserRead(BaseModel):
-    id: str
-    name: str
     
 class AudioCreate(BaseModel):
     status: str
@@ -16,5 +9,5 @@ class AudioCreate(BaseModel):
 class AudioRead(BaseModel):
     id: str
     status: str
-    date_created: str
-    date_updated: str
+    date_created: datetime
+    date_updated: datetime

@@ -21,15 +21,24 @@ class Config(BaseSettings):
     CLIENT_SECRET_FILE: str = os.environ.get(
         "CLIENT_SECRET_FILE", "C:/Users/User/Downloads/secrets.json"
     )
+    
     DATA_DIR: str = "C:\\Datasets\\audio\\maongezi"
+    
     CELERY_BROKER_URL: str = os.environ.get("CELERY_BROKER_URL", "redis://127.0.0.1:6379/0")            # NEW
     CELERY_RESULT_BACKEND: str = os.environ.get("CELERY_RESULT_BACKEND", "redis://127.0.0.1:6379/0")
+    
+    POSTGRES_USER: str = os.getenv("POSTGRES_USER", "postgres")
+    POSTGRES_PASSWORD: str = os.getenv("POSTGRES_PASSWORD", "lyle")
+    POSTGRES_DB: str = os.getenv("POSTGRES_DB", "postgres")
+    POSTGRES_HOST: str = os.getenv("POSTGRES_HOST", "127.0.0.1")
+    POSTGRES_PORT: int = os.getenv("POSTGRES_PORT", 5432)
+    
     MAX_AUDIO_DURATION_SECONDS: int = 30  # 15 minutes
     MIN_AUDIO_DURATION_SECONDS: int = 10  # 5 seconds
 
     @property
     def db_url(self):
-        return f"sqlite:///./{self.db_name}"
+        return f"postgresql+psycopg2://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
 
 
 config = Config()

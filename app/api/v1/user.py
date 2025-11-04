@@ -4,7 +4,9 @@ from app.db.schema import SessionLocal
 from app.models.user import UserCreate, UserRead
 from app.services.user_service import UserService
 
-router = APIRouter()
+router = APIRouter(
+    tags=["User Management"],
+)
 
 
 def get_user_service() -> UserService:
@@ -22,7 +24,7 @@ def create_user(user: UserCreate, service: UserService = Depends(get_user_servic
 
 
 @router.get("/users/{user_id}", response_model=UserRead)
-def get_user(user_id: int, service: UserService = Depends(get_user_service)):
+def get_user(user_id: str, service: UserService = Depends(get_user_service)):
     user = service.get_user(user_id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -31,7 +33,7 @@ def get_user(user_id: int, service: UserService = Depends(get_user_service)):
 
 @router.put("/users/{user_id}", response_model=UserRead)
 def update_user(
-    user_id: int, user: UserCreate, service: UserService = Depends(get_user_service)
+    user_id: str, user: UserCreate, service: UserService = Depends(get_user_service)
 ):
     updated = service.update_user(user_id, user.name)
     if not updated:
@@ -40,7 +42,7 @@ def update_user(
 
 
 @router.delete("/users/{user_id}")
-def delete_user(user_id: int, service: UserService = Depends(get_user_service)):
+def delete_user(user_id: str, service: UserService = Depends(get_user_service)):
     success = service.delete_user(user_id)
     if not success:
         raise HTTPException(status_code=404, detail="User not found")

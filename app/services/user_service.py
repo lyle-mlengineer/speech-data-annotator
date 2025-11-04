@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 
 from app.db.schema import User
+from app.core.utils import generate_id
 
 
 class UserService:
@@ -10,17 +11,17 @@ class UserService:
     def list_users(self) -> list[User]:
         return self._db.query(User).all()
 
-    def get_user(self, user_id: int) -> User | None:
+    def get_user(self, user_id: str) -> User | None:
         return self._db.query(User).filter(User.id == user_id).first()
 
     def create_user(self, name: str) -> User:
-        user = User(name=name)
+        user = User(name=name, id=generate_id(prefix="USER"))
         self._db.add(user)
         self._db.commit()
         self._db.refresh(user)
         return user
 
-    def update_user(self, user_id: int, name: str) -> User | None:
+    def update_user(self, user_id: str, name: str) -> User | None:
         user = self.get_user(user_id)
         if not user:
             return None
@@ -29,7 +30,7 @@ class UserService:
         self._db.refresh(user)
         return user
 
-    def delete_user(self, user_id: int) -> bool:
+    def delete_user(self, user_id: str) -> bool:
         user = self.get_user(user_id)
         if not user:
             return False
