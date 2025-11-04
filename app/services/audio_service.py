@@ -18,6 +18,9 @@ from tubectrl import YouTube
 from tubectrl.models import Video
 from sqlalchemy.orm import Session
 from app.db.schema import Audio
+from app.services.task_service import TaskService
+from app.db.schema import SessionLocal
+from app.db.schema import Task
 
 
 class AudioDetails(BaseModel):
@@ -126,16 +129,25 @@ class AudioService:
                 if len(audio_segment) < config.MIN_AUDIO_DURATION_SECONDS * sr:
                     continue
                 sf.write(os.path.join(audio_dir, f"{audio_id}_{start_idx}.wav"), audio_segment, sr)
+                self.create_task(id=f"{audio_id}_{start_idx}", audio_id=audio_id)
         except Exception as e:
             logging.error(f"Error slicing audio: {e}")
             self.update_audio(audio_id, "SLICING_FAILED")
         else:
             self.update_audio(audio_id, "SLICED")
+            
+    def create_task(self, id: str, audio_id: str) -> Task:
+        logging.info(f"Creating task for audio ID: {audio_id} and segment ID: {id}")
+        service = TaskService(session=self._db)
+        task = service.create_task(id=id, audio_id=audio_id)
+        self._db.add(task)
+        self._db.commit()
+        logging.info(f"Task created for audio ID: {audio_id} and segment ID: {id}")
+        return task
     
     def create_audio(self, audio_url: str):
         logging.info(f"Creating download task for URL: {audio_url}")
         audio_id: str = self.parse_video_id(audio_url)
-        task_id: str = generate_id(prefix="AUDIO")
         audio = Audio(id=audio_id, status="CREATED")
         self._db.add(audio)
         self._db.commit()

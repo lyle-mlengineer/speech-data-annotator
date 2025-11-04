@@ -1,4 +1,4 @@
-from sqlalchemy import String, create_engine, DateTime
+from sqlalchemy import String, create_engine, DateTime, ForeignKey
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
 from datetime import datetime, timezone
 
@@ -26,3 +26,16 @@ class Audio(Base):
     status: Mapped[str] = mapped_column(String, index=True)
     date_created: Mapped[datetime] = mapped_column(DateTime, default=datetime.now(timezone.utc))
     date_updated: Mapped[datetime] = mapped_column(DateTime, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
+
+
+class Task(Base):
+    __tablename__ = "tasks"
+
+    id: Mapped[str] = mapped_column(primary_key=True)
+    audio_id: Mapped[str] = mapped_column(String, ForeignKey("audios.id", ondelete="CASCADE"))
+    user_id: Mapped[str] = mapped_column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=True)
+    status: Mapped[str] = mapped_column(String, index=True)
+    date_created: Mapped[datetime] = mapped_column(DateTime, default=datetime.now(timezone.utc))
+    date_updated: Mapped[datetime] = mapped_column(DateTime, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
+
+    
