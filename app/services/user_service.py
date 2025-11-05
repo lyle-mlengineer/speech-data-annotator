@@ -9,7 +9,7 @@ class UserService:
         self._db = session
 
     def list_users(self) -> list[User]:
-        return self._db.query(User).all()
+        return self._db.query(User).all() 
 
     def get_user(self, user_id: str) -> User | None:
         return self._db.query(User).filter(User.id == user_id).first()

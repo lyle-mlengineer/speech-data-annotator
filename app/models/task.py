@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from datetime import datetime
 
 class TaskCreate(BaseModel):
     id: str
@@ -14,7 +15,10 @@ class TaskUpdate(BaseModel):
 class TaskRead(BaseModel):
     id: str
     status: str
-    date_created: str
-    date_updated: str
+    date_created: datetime
+    date_updated: datetime
     audio_id: str
-    user_id: str = None
+    user_id: str | None = None
+    
+    # def from_orm(self, task: Task) -> TaskRead:
+    #     return TaskRead(**task.__dict__)
