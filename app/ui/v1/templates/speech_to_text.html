@@ -6,7 +6,7 @@
 {% endblock %}
 
 {%block product%}
-<form action="/api/v1/transcribe" class="prompt-form" method="post" enctype="multipart/form-data">
+<form action="/speech_to_text" class="prompt-form" method="post" enctype="multipart/form-data">
                <!--User and Audio details-->
                <input type="hidden" id="user-id" value="anonymous_user_id" name="user_id" />
                <input type="hidden" id="audio-id" value="{{ audio_id }}" name="audio_id" />   

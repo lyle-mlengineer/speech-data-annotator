@@ -1,4 +1,4 @@
-from sqlalchemy import String, create_engine, DateTime, ForeignKey
+from sqlalchemy import String, create_engine, DateTime, ForeignKey, Float, Text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
 from datetime import datetime, timezone
 
@@ -31,6 +31,7 @@ class Audio(Base):
 
     id: Mapped[str] = mapped_column(primary_key=True)
     status: Mapped[str] = mapped_column(String, index=True)
+    # duration: Mapped[float] = mapped_column(Float)
     date_created: Mapped[datetime] = mapped_column(DateTime, default=datetime.now(timezone.utc))
     date_updated: Mapped[datetime] = mapped_column(DateTime, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
 
@@ -44,5 +45,15 @@ class Task(Base):
     status: Mapped[str] = mapped_column(String, index=True)
     date_created: Mapped[datetime] = mapped_column(DateTime, default=datetime.now(timezone.utc))
     date_updated: Mapped[datetime] = mapped_column(DateTime, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
-
+    # duration: Mapped[float] = mapped_column(Float)
     
+class Transcription(Base):
+    __tablename__ = "transcriptions"
+
+    id: Mapped[str] = mapped_column(primary_key=True)
+    task_id: Mapped[str] = mapped_column(String, ForeignKey("tasks.id", ondelete="CASCADE"))
+    user_id: Mapped[str] = mapped_column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=True)
+    transcript: Mapped[str] = mapped_column(Text, default="")
+    language: Mapped[str] = mapped_column(String, index=True)
+    date_created: Mapped[datetime] = mapped_column(DateTime, default=datetime.now(timezone.utc))
+    date_updated: Mapped[datetime] = mapped_column(DateTime, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))

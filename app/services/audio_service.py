@@ -2,7 +2,7 @@ from app.core.config import config
 import os
 import yt_dlp
 from app.core.utils import generate_id
-from app.api.v1.utils import (
+from app.services.helpers import (
     get_youtube, 
     find_video, 
     parse_video_details, 
@@ -123,12 +123,12 @@ class AudioService:
         if len(audio.shape) > 1:
             audio = audio.mean(axis=0)
         try:
-            for start_idx in range(0, len(audio), config.MAX_AUDIO_DURATION_SECONDS * sr):
+            for i, start_idx in enumerate(range(0, len(audio), config.MAX_AUDIO_DURATION_SECONDS * sr)):
                 end_idx = start_idx + config.MAX_AUDIO_DURATION_SECONDS * sr
                 audio_segment = audio[start_idx:end_idx]
                 if len(audio_segment) < config.MIN_AUDIO_DURATION_SECONDS * sr:
                     continue
-                sf.write(os.path.join(audio_dir, f"{audio_id}_{start_idx}.wav"), audio_segment, sr)
+                sf.write(os.path.join(audio_dir, f"{audio_id}_{i+1}.wav"), audio_segment, sr)
                 self.create_task(id=f"{audio_id}_{start_idx}", audio_id=audio_id)
         except Exception as e:
             logging.error(f"Error slicing audio: {e}")
