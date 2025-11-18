@@ -10,6 +10,9 @@ from app.services.utils import (
 
 def assign_task(user_id: str, request: Request, service: TaskService = Depends(get_task_service)) -> str:
     task: TaskRead = service.get_and_assign_task(user_id=user_id)
+    print(f"Assigned task: {task}") # Debugging line to check the task assignment
+    if not task:
+        return "", ""
     return parse_task(task=task, request=request)
 
 def parse_task(task: TaskRead, request: Request):

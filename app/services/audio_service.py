@@ -128,13 +128,24 @@ class AudioService:
                 audio_segment = audio[start_idx:end_idx]
                 if len(audio_segment) < config.MIN_AUDIO_DURATION_SECONDS * sr:
                     continue
-                sf.write(os.path.join(audio_dir, f"{audio_id}_{i+1}.wav"), audio_segment, sr)
-                self.create_task(id=f"{audio_id}_{start_idx}", audio_id=audio_id)
+                task_id: str = f"{audio_id}_{i+1}"
+                sf.write(os.path.join(audio_dir, f"{task_id}.wav"), audio_segment, sr)
+                self.create_task(id=task_id, audio_id=audio_id)
         except Exception as e:
             logging.error(f"Error slicing audio: {e}")
             self.update_audio(audio_id, "SLICING_FAILED")
         else:
             self.update_audio(audio_id, "SLICED")
+
+    def download_and_slice_audio(self, audio_url: str) -> DownloadResult | None:
+        logging.info(f"Downloading and slicing audio for URL: {audio_url}")
+        download_result = self.download_audio(audio_url)
+        if not download_result:
+            return None
+        audio_id: str = download_result['audio_id']
+        audio_file_path: str = download_result['audio_file_path']
+        self.slice_audio(audio_id, audio_file_path)
+        return download_result
             
     def create_task(self, id: str, audio_id: str) -> Task:
         logging.info(f"Creating task for audio ID: {audio_id} and segment ID: {id}")

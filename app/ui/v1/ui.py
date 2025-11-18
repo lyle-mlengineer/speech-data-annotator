@@ -36,7 +36,7 @@ async def get_speech_to_text_page(
     service: TaskService = Depends(get_task_service)
     ):
     """Load the speech to text page"""
-    user_id: str = "USER-7a595130-cd88-4cba-a1a8-5d8908e07974"
+    user_id: str = "USER-2d5cecd0-b021-438f-a458-61087673b56a"
     logging.info("Transcribing audio")
     audio_url, task_id = assign_task(user_id=user_id, service=service, request=request)
     return templates.TemplateResponse(
@@ -60,7 +60,7 @@ async def transcribe_audio(
     transcription_service: TranscriptionService = Depends(get_transcription_service)
     ):
     """Load the speech to text page"""
-    user_id: str = "USER-7a595130-cd88-4cba-a1a8-5d8908e07974"
+    user_id: str = "USER-2d5cecd0-b021-438f-a458-61087673b56a"
     logging.info("Submitting transcription")
     audio_url, task_id = submit_transcript(
         audio_id=audio_id, 

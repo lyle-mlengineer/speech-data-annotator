@@ -42,6 +42,8 @@ class TaskService:
     def get_available_task(self) -> TaskRead | None:
         """Get the first task with `status` = `CREATED`. Order by date added."""
         task = self._db.query(Task).filter(Task.status == "CREATED").first()
+        if not task:
+            return None
         task = TaskRead(
             id=task.id,
             status=task.status,
@@ -132,7 +134,7 @@ class TaskService:
         task = self.get_available_task()
         if not task:
             return None
-        # task = self.assign_task(task_id=task.id, user_id=user_id)
+        task = self.assign_task(task_id=task.id, user_id=user_id)
         task = TaskRead(
             id=task.id,
             status=task.status,

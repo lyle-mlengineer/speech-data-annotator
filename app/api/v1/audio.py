@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Form, status
+from fastapi import APIRouter, Depends, Form, status, BackgroundTasks
 from typing import Annotated
 from app.api.v1.schema import AudioDetails
 from app.core.worker import download_audio_task, slice_audio_task
@@ -23,12 +23,20 @@ async def get_audio_details(audio_url: Annotated[str, Form()], service = Depends
     return audio_details
 
 @router.post("/audio/download", response_model=None, status_code=status.HTTP_201_CREATED)
-async def download_audio(audio_url: Annotated[str, Form()], service = Depends(get_audio_service)):
+async def download_audio(
+    audio_url: Annotated[str, Form()], 
+    service = Depends(get_audio_service),
+    background_tasks: BackgroundTasks = BackgroundTasks()
+    ):
     """Dependency to download audio file"""
-    audio_details = service.get_audio_details(audio_url)
+    # audio_details = service.get_audio_details(audio_url)
+    # if not audio_details:
+    #     return { "message": "Audio details not found" }
+    # Initiate the download and slicing tasks
+    background_tasks.add_task(service.download_and_slice_audio , audio_url)
     # download_audio_task.delay(audio_url)
-    download_audio_task.apply_async((audio_url,), link=slice_audio_task.s())
-    return { "message": "Audio download initiated", "details": audio_details }
+    # download_audio_task.apply_async((audio_url,), link=slice_audio_task.s())
+    return { "message": "Audio download initiated" }
 
 @router.get("/audio/{audio_id}", response_model=AudioRead, status_code=status.HTTP_200_OK)
 async def get_audio(audio_id: str, service = Depends(get_audio_service)):
