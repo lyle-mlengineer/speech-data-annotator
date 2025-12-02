@@ -19,7 +19,8 @@ class Config(BaseSettings):
         "CLIENT_SECRET_FILE", "/home/lyle/Downloads/secrets.json"
     )
     
-    DATA_DIR: str = "/home/lyle/datasets/audio/maongezi"
+    # DATA_DIR: str = "/home/lyle/datasets/audio/maongezi"
+    DATA_DIR: str = "app/api/v1/data"
 
     GOOGLE_DRIVE_FOLDER_ID: str = "161MWUwPv6O0wpmCB3Il6wasQ4L0dStOF"
     GOOGLE_DRIVE_CREDENTIALS: str = "/home/lyle/.drive/credentials.json"

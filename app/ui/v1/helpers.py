@@ -9,6 +9,7 @@ from app.services.utils import (
 )
 from fastapi import BackgroundTasks
 import os
+from app.core.config import config
 
 def assign_task(
         user_id: str, 
@@ -26,7 +27,7 @@ def parse_task(
         request: Request, 
         service: TaskService,
         background_tasks: BackgroundTasks = BackgroundTasks()):
-    audio_path: str = f"raw/{task.audio_id}/{task.id}.wav"
+    audio_path: str = os.path.join("audio", task.audio_id, f"{task.id}.wav")
     if not os.path.exists(audio_path):
         # background_tasks.add_task(service.download_audio, (task.fileid, task.audio_id, task.id))
         service.download_audio(file_id=task.fileid, audio_id=task.audio_id, task_id=task.id)

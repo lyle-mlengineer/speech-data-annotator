@@ -4,10 +4,23 @@ from app.models.transcript import TranscriptRead, TranscriptCreate, TranscriptUp
 from app.core.utils import generate_id
 from app.services.task_service import TaskService
 from app.models.task import TaskRead
+import json
+import os
+from app.core.config import config
 
 class TranscriptionService:
     def __init__(self, session: Session) -> None:
         self._db = session
+
+    def save_transcript_locally(self, transcript: TranscriptCreate):
+        transcript_path = os.path.join(config.DATA_DIR, "transcripts", transcript.id + ".json")
+        with open(transcript_path, "w") as f:
+            data = {
+                "task_id": transcript.task_id,
+                "transcript": transcript.transcript,
+                "language": transcript.language
+            }
+            json.dump(data, f, indent=4)
         
     def create_transcript(self, transcript: TranscriptCreate) -> TranscriptRead:
         new_transcript = Transcription(
@@ -20,6 +33,7 @@ class TranscriptionService:
         self._db.add(new_transcript)
         self._db.commit()
         self._db.refresh(new_transcript)
+        self.save_transcript_locally(new_transcript)
         return TranscriptRead.from_orm(new_transcript)
     
     def update_task(self, task_id: str, task_service: TaskService) -> TaskRead | None:

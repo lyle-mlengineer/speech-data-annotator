@@ -42,7 +42,7 @@ class DownloadResult(TypedDict):
 
 class AudioService:
     def __init__(self, session: Session):
-        self.data_dir: str = os.path.join(config.DATA_DIR, "raw")
+        self.data_dir: str = os.path.join(config.DATA_DIR, "audio")
         self._db = session
         self.drive = GoogleDrive()
         self.drive.authenticate_from_credentials(config.GOOGLE_DRIVE_CREDENTIALS)

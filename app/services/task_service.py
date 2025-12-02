@@ -204,7 +204,7 @@ class TaskService:
         logging.info(f"Downloading audio file with ID {file_id} from Google Drive")
         try:
             print(file_id)
-            audio_dir: str = os.path.join(config.DATA_DIR, 'raw', audio_id)
+            audio_dir: str = os.path.join(config.DATA_DIR, 'audio', audio_id)
             if not os.path.exists(audio_dir):
                 os.makedirs(audio_dir)
             destination_path: str = os.path.join(audio_dir, f"{task_id}.wav")
