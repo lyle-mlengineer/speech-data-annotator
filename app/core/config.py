@@ -8,12 +8,9 @@ load_dotenv()
 class Config(BaseSettings):
     app_name: str = "SautiFlow Labs"
     debug: bool = False
-    db_user: str = ""
-    db_password: str = ""
-    db_name: str = "test.db"
 
-    templates_dir: str = "app/ui/v1/templates"
-    static_dir: str = "app/ui/v1/static"
+    TEMPLATES_DIR: str = "app/ui/v1/templates"
+    STATIC_DIR: str = "app/ui/v1/static"
     
     YOUTUBE_CREDENTIALS_PATH: str = os.getenv(
         "YOUTUBE_CREDENTIALS_PATH", "credentials.json"
@@ -22,10 +19,10 @@ class Config(BaseSettings):
         "CLIENT_SECRET_FILE", "/home/lyle/Downloads/secrets.json"
     )
     
-    DATA_DIR: str = "/home/lyle/Datasets/audio/maongezi"
-    
-    CELERY_BROKER_URL: str = os.environ.get("CELERY_BROKER_URL", "redis://127.0.0.1:6379/0")            # NEW
-    CELERY_RESULT_BACKEND: str = os.environ.get("CELERY_RESULT_BACKEND", "redis://127.0.0.1:6379/0")
+    DATA_DIR: str = "/home/lyle/datasets/audio/maongezi"
+
+    GOOGLE_DRIVE_FOLDER_ID: str = "161MWUwPv6O0wpmCB3Il6wasQ4L0dStOF"
+    GOOGLE_DRIVE_CREDENTIALS: str = "/home/lyle/.drive/credentials.json"
     
     POSTGRES_USER: str = os.getenv("POSTGRES_USER", "postgres")
     POSTGRES_PASSWORD: str = os.getenv("POSTGRES_PASSWORD", "postgres")

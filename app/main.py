@@ -24,5 +24,5 @@ app.include_router(audio.router, prefix="/api/v1")
 app.include_router(task.router, prefix="/api/v1")
 
 # Mount static folder
-app.mount("/static", StaticFiles(directory=config.static_dir), name="static")
+app.mount("/static", StaticFiles(directory=config.STATIC_DIR), name="static")
 app.mount("/data", StaticFiles(directory=config.DATA_DIR), name="data")

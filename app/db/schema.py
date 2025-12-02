@@ -46,6 +46,7 @@ class Task(Base):
     date_created: Mapped[datetime] = mapped_column(DateTime, default=datetime.now(timezone.utc))
     date_updated: Mapped[datetime] = mapped_column(DateTime, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
     # duration: Mapped[float] = mapped_column(Float)
+    fileid: Mapped[str] = mapped_column(String, nullable=True)
     
 class Transcription(Base):
     __tablename__ = "transcriptions"

@@ -13,5 +13,6 @@ librosa
 celery[redis]
 gevent
 yt-dlp
+oryks-google-drive
 
 # ffprobe and ffmpeg ffplay

@@ -1,6 +1,7 @@
 from app.core.config import config  
 import os
 import yt_dlp
+import shutil
 from app.core.utils import generate_id
 from app.services.helpers import (
     get_youtube, 
@@ -21,6 +22,8 @@ from app.db.schema import Audio
 from app.services.task_service import TaskService
 from app.db.schema import SessionLocal
 from app.db.schema import Task
+from oryks_google_drive import GoogleDrive
+from oryks_google_drive.mime_types import MimeType
 
 
 class AudioDetails(BaseModel):
@@ -41,6 +44,8 @@ class AudioService:
     def __init__(self, session: Session):
         self.data_dir: str = os.path.join(config.DATA_DIR, "raw")
         self._db = session
+        self.drive = GoogleDrive()
+        self.drive.authenticate_from_credentials(config.GOOGLE_DRIVE_CREDENTIALS)
         
     def parse_video_id(self, url: str) -> str:
         video_id: str
@@ -99,6 +104,7 @@ class AudioService:
         audio_file_path: str = os.path.join(audio_dir, f"{audio_id}.mp3")
         result = None
         if not os.path.exists(audio_file_path):
+            logging.info(f"Downloading audio for video ID: {audio_id}")
             self.create_audio(audio_url)
             try:
                 self.update_audio(audio_id, "DOWNLOADING")
@@ -114,6 +120,8 @@ class AudioService:
                 self.update_audio(audio_id, "DOWNLOAD_FAILED")
             else:
                 self.update_audio(audio_id, "DOWNLOADED")
+        else:
+            logging.info(f"Audio already downloaded for video ID: {audio_id}")
         return result
     
     def slice_audio(self, audio_id: str, audio_file_path: str) -> None:
@@ -136,6 +144,24 @@ class AudioService:
             self.update_audio(audio_id, "SLICING_FAILED")
         else:
             self.update_audio(audio_id, "SLICED")
+
+    def upload_to_google_drive(self, file_path: str) -> str:
+        """Upload a file to Google Drive and return the file ID."""
+        try:
+            file = self.drive.upload_file(
+                file_path,
+                mime_type=MimeType.AUDIO_MP3.value if file_path.endswith('.mp3') else MimeType.AUDIO_WAV.value
+            )
+            return file.get("id", "")
+        except Exception as e:
+            raise RuntimeError(f"Failed to upload file to Google Drive: {e}")
+        
+    def move_file_in_drive(self, file_id: str, destination_folder_id: str = config.GOOGLE_DRIVE_FOLDER_ID) -> None:
+        """Move a file in Google Drive to a different folder."""
+        try:
+            self.drive.move_file(file_id, destination_folder_id)
+        except Exception as e:
+            raise RuntimeError(f"Failed to move file in Google Drive: {e}")
 
     def download_and_slice_audio(self, audio_url: str) -> DownloadResult | None:
         logging.info(f"Downloading and slicing audio for URL: {audio_url}")
@@ -183,3 +209,33 @@ class AudioService:
         self._db.commit()
         logging.info(f"Task {audio_id} updated to status {status}")
         return audio
+
+    def process_audio(self, audio_url: str) -> None:
+        logging.info(f"Processing audio for URL: {audio_url}")
+        download_result = self.download_audio(audio_url)
+        if not download_result:
+            return None
+        audio_id: str = download_result['audio_id']
+        audio_file_path: str = download_result['audio_file_path']
+        self.slice_audio(audio_id, audio_file_path)
+        audio_dir: str = os.path.join(self.data_dir, audio_id)
+        service: TaskService = TaskService(session=self._db)
+        for file in os.listdir(audio_dir):
+            if file.endswith(".wav"):
+                file_path = os.path.join(audio_dir, file)
+                file_id = self.upload_to_google_drive(file_path)
+                task_id = file.split(".")[0]
+                service.update_task(task_id=task_id, fileid=file_id)
+                self.move_file_in_drive(file_id)
+        self.update_audio(audio_id, "UPLOADED")
+        self.delete_audio(audio_id)
+
+    def delete_audio(self, audio_id: str) -> None:
+        logging.info(f"Deleting audio with ID: {audio_id}")
+        audio_dir: str = os.path.join(self.data_dir, audio_id)
+        audio_file_path: str = os.path.join(audio_dir, f"{audio_id}.mp3")
+        if os.path.exists(audio_file_path):
+            os.remove(audio_file_path)
+        if os.path.exists(audio_dir):
+            shutil.rmtree(audio_dir)
+        self.update_audio(audio_id, "DELETED")

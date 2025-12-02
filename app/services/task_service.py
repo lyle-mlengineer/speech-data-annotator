@@ -3,11 +3,17 @@ from sqlalchemy.orm import Session
 from app.db.schema import Task
 from app.core.utils import generate_id
 from app.models.task import TaskRead
+import logging
+from oryks_google_drive import GoogleDrive
+from app.core.config import config
+import os
 
 
 class TaskService:
     def __init__(self, session: Session):
         self._db = session
+        self.drive = GoogleDrive()
+        self.drive.authenticate_from_credentials(config.GOOGLE_DRIVE_CREDENTIALS)
 
     def list_tasks(self) -> list[TaskRead]:
         tasks = self._db.query(Task).all()
@@ -35,7 +41,9 @@ class TaskService:
             status=task.status,
             date_created=task.date_created,
             date_updated=task.date_updated,
-            audio_id=task.audio_id
+            audio_id=task.audio_id,
+            user_id=task.user_id,
+            fileid=task.fileid
         )
         return task
     
@@ -49,7 +57,8 @@ class TaskService:
             status=task.status,
             date_created=task.date_created,
             date_updated=task.date_updated,
-            audio_id=task.audio_id
+            audio_id=task.audio_id,
+            fileid=task.fileid
         )
         return task
         
@@ -140,7 +149,9 @@ class TaskService:
             status=task.status,
             date_created=task.date_created,
             date_updated=task.date_updated,
-            audio_id=task.audio_id
+            audio_id=task.audio_id,
+            fileid=task.fileid,
+            user_id=task.user_id
         )
         return task
     
@@ -163,14 +174,19 @@ class TaskService:
         self._db.refresh(task)
         return task
 
-    def update_task(self, task_id: str, status: str = None, user_id: str = None) -> Task | None:
+    def update_task(self, task_id: str, status: str = None, user_id: str = None, fileid: str = None) -> Task | None:
         task = self.get_task(task_id)
         if not task:
             return None
         if status:
+            logging.info(f"Updating task {task_id} to status {status}")
             task.status = status
         if user_id:
+            logging.info(f"Assigning task {task_id} to user {user_id}")
             task.user_id = user_id
+        if fileid:
+            logging.info(f"Uploading task {task_id} to file {fileid}")
+            task.fileid = fileid
         self._db.commit()
         self._db.refresh(task)
         return task
@@ -182,3 +198,16 @@ class TaskService:
         self._db.delete(task)
         self._db.commit()
         return True
+    
+    def download_audio(self, file_id: str, audio_id: str, task_id: str) -> None:
+        """Download an audio file from Google Drive to the specified destination path."""
+        logging.info(f"Downloading audio file with ID {file_id} from Google Drive")
+        try:
+            print(file_id)
+            audio_dir: str = os.path.join(config.DATA_DIR, 'raw', audio_id)
+            if not os.path.exists(audio_dir):
+                os.makedirs(audio_dir)
+            destination_path: str = os.path.join(audio_dir, f"{task_id}.wav")
+            self.drive.download_file(file_id=file_id, file_path=destination_path)
+        except Exception as e:
+            raise RuntimeError(f"Failed to download file from Google Drive: {e}")

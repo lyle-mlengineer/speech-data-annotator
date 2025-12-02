@@ -1,5 +1,5 @@
 from fastapi import status
-from fastapi import APIRouter, Depends, Request, Form
+from fastapi import APIRouter, Depends, Request, Form, BackgroundTasks
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from app.core.config import config
@@ -11,10 +11,11 @@ from app.ui.v1.helpers import (
     TaskService, 
     TranscriptionService
 )
+from app.services.utils import get_audio_service, AudioService
 from typing import Annotated
 import logging
 
-templates = Jinja2Templates(directory=config.templates_dir)
+templates = Jinja2Templates(directory=config.TEMPLATES_DIR)
    
 
 router = APIRouter(
@@ -27,6 +28,36 @@ async def get_landing_page(request: Request):
         "landing_page.html", 
         {
             "request": request,
+        }
+    )
+
+@router.get('/audio', status_code=status.HTTP_200_OK, response_class=HTMLResponse)
+async def get_audio_page(request: Request):
+    """Load the audio page"""
+    return templates.TemplateResponse(
+        "audio.html", 
+        {
+            "request": request,
+            "title": "SautiFlow Audio",
+            "current_page": "audio" 
+        }
+    )
+
+@router.post('/audio', status_code=status.HTTP_201_CREATED, response_class=HTMLResponse)
+async def download_audio(
+    audio_url: Annotated[str, Form()], 
+    request: Request,
+    service: AudioService = Depends(get_audio_service),
+    background_tasks: BackgroundTasks = BackgroundTasks()
+    ):
+    """Load the audio page"""
+    background_tasks.add_task(service.process_audio, audio_url)
+    return templates.TemplateResponse(
+        "audio.html", 
+        {
+            "request": request,
+            "title": "SautiFlow Audio",
+            "current_page": "audio",
         }
     )
 

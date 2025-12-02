@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends, Form, status, BackgroundTasks
 from typing import Annotated
 from app.api.v1.schema import AudioDetails
-from app.core.worker import download_audio_task, slice_audio_task
 
 from app.db.schema import SessionLocal
 from app.models.audio import AudioRead

@@ -7,16 +7,29 @@ from app.services.utils import (
     get_transcription_service, 
     TranscriptionService
 )
+from fastapi import BackgroundTasks
+import os
 
-def assign_task(user_id: str, request: Request, service: TaskService = Depends(get_task_service)) -> str:
+def assign_task(
+        user_id: str, 
+        request: Request, 
+        service: TaskService = Depends(get_task_service)
+        ) -> str:
     task: TaskRead = service.get_and_assign_task(user_id=user_id)
     print(f"Assigned task: {task}") # Debugging line to check the task assignment
     if not task:
         return "", ""
-    return parse_task(task=task, request=request)
+    return parse_task(task=task, request=request, service=service)
 
-def parse_task(task: TaskRead, request: Request):
+def parse_task(
+        task: TaskRead, 
+        request: Request, 
+        service: TaskService,
+        background_tasks: BackgroundTasks = BackgroundTasks()):
     audio_path: str = f"raw/{task.audio_id}/{task.id}.wav"
+    if not os.path.exists(audio_path):
+        # background_tasks.add_task(service.download_audio, (task.fileid, task.audio_id, task.id))
+        service.download_audio(file_id=task.fileid, audio_id=task.audio_id, task_id=task.id)
     audio_url: str = request.url_for("data", path=audio_path).__str__()
     return audio_url, task.id
 

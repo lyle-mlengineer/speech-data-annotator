@@ -11,6 +11,7 @@ class TaskCreate(BaseModel):
 class TaskUpdate(BaseModel):
     status: str = None
     user_id: str = None
+    fileid: str = None
     
     
 class TaskRead(BaseModel):
@@ -20,6 +21,7 @@ class TaskRead(BaseModel):
     date_updated: datetime
     audio_id: str
     user_id: str | None = None
+    fileid: str | None = None
     # duration: float
     
     # def from_orm(self, task: Task) -> TaskRead:
