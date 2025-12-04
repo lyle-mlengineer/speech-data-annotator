@@ -1,5 +1,5 @@
 from fastapi import status
-from fastapi import APIRouter, Depends, Request, Form, BackgroundTasks
+from fastapi import APIRouter, Depends, Request, Form, BackgroundTasks, File, UploadFile
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from app.core.config import config
@@ -62,6 +62,25 @@ async def download_audio(
         }
     )
 
+@router.post('/upload', status_code=status.HTTP_201_CREATED, response_class=HTMLResponse)
+async def upload_audio(
+    file: Annotated[UploadFile, File()],
+    request: Request,
+    service: AudioService = Depends(get_audio_service),
+    background_tasks: BackgroundTasks = BackgroundTasks()
+    ):
+    """Load the audio page"""
+    background_tasks.add_task(service.process_uploaded_file, file)
+    return templates.TemplateResponse(
+        "audio.html", 
+        {
+            "request": request,
+            "title": "SautiFlow Audio",
+            "current_page": "audio",
+        }
+    )   
+
+
 @router.get('/speech_to_text', status_code=status.HTTP_200_OK, response_class=HTMLResponse)
 async def get_speech_to_text_page(
     request: Request,
@@ -70,15 +89,15 @@ async def get_speech_to_text_page(
     ):
     """Load the speech to text page"""
     logging.info("Transcribing audio")
-    audio_url, task_id = assign_task(user_id=user_id, service=service, request=request)
+    # audio_url, task_id = assign_task(user_id=user_id, service=service, request=request)
     return templates.TemplateResponse(
         "speech_to_text.html", 
         {
             "request": request,
             "title": "SautiFlow STT",
             "current_page": "stt",
-            "audio_id": task_id,
-            "audio_src": audio_url,
+            "audio_id": 'task_id',
+            "audio_src": 'audio_url',
         }
     )
     
@@ -98,26 +117,26 @@ async def transcribe_audio(
     """Load the speech to text page"""
     print(f"Audio ID: {audio_id}, Language: {language}, Transcription: {transcription}, Gender: {gender}, Speaker: {speaker}, Keep: {keep}")
     logging.info("Submitting transcription")
-    audio_url, task_id = submit_transcript(
-        audio_id=audio_id, 
-        user_id=user_id, 
-        transcript=transcription, 
-        language=language, 
-        gender=gender,
-        speaker=speaker,
-        keep=keep,
-        service=transcription_service,
-        task_service=task_service,
-        request=request
-    )
+    # audio_url, task_id = submit_transcript(
+    #     audio_id=audio_id, 
+    #     user_id=user_id, 
+    #     transcript=transcription, 
+    #     language=language, 
+    #     gender=gender,
+    #     speaker=speaker,
+    #     keep=keep,
+    #     service=transcription_service,
+    #     task_service=task_service,
+    #     request=request
+    # )
     return templates.TemplateResponse(
         "speech_to_text.html", 
         {
             "request": request,
             "title": "SautiFlow STT",
             "current_page": "stt",
-            "audio_id": task_id,
-            "audio_src": audio_url,
+            "audio_id": 'task_id',
+            "audio_src": 'audio_url',
         }
     )
 

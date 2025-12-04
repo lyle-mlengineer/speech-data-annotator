@@ -50,3 +50,8 @@ def unassign_task(task_id: str, service: TaskService = Depends(get_task_service)
     if not task:
         raise HTTPException(status_code=404, detail="task not found")
     return task
+
+@router.patch("/tasks/unassign", response_model=list[TaskRead])
+def unassign_tasks(service: TaskService = Depends(get_task_service)):
+    tasks = service.un_assign_tasks()
+    return tasks

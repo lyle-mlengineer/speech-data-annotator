@@ -14,3 +14,12 @@ nextTaskBtn.addEventListener('click', () => {
         console.log(err)
     })
 })
+
+// window.setTimeout( function() {
+//     fetch(`/api/v1/tasks/${audioId.value}/unassign`
+//     , {
+//         method: 'PATCH'
+//     }
+//     )
+//     window.location.reload();
+// }, 30000);

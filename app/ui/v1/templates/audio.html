@@ -10,4 +10,22 @@
         <input type="text" name="audio_url" id="audio-id" placeholder="Enter the YouTube Video url" class="audio-url" required>
         <button type="submit" class="audio-btn">Get Audio</button>
     </form>
+
+    <div class="separator">
+        <span>or</span>
+    </div>
+
+    <form class="card" action="/upload" method="post" enctype="multipart/form-data">
+        <label for="fileInput" class="file-label">
+            <i class="fas fa-cloud-upload-alt"></i> 
+          Choose an Audio file
+        </label>
+        <input type="file" id="fileInput" class="file-input" hidden name="file" />
+        <button type="submit" class="file-label" id="upload">Upload</button>
+    </form>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script src="{{ url_for('static', path='js/audio.js') }}"></script>
 {% endblock %}

@@ -24,6 +24,8 @@ from app.db.schema import SessionLocal
 from app.db.schema import Task
 from oryks_google_drive import GoogleDrive
 from oryks_google_drive.mime_types import MimeType
+from fastapi import UploadFile, HTTPException
+from app.core.utils import generate_id
 
 
 class AudioDetails(BaseModel):
@@ -105,7 +107,7 @@ class AudioService:
         result = None
         if not os.path.exists(audio_file_path):
             logging.info(f"Downloading audio for video ID: {audio_id}")
-            self.create_audio(audio_url)
+            self.create_audio(audio_id)
             try:
                 self.update_audio(audio_id, "DOWNLOADING")
                 if not os.path.exists(audio_dir):
@@ -182,9 +184,7 @@ class AudioService:
         logging.info(f"Task created for audio ID: {audio_id} and segment ID: {id}")
         return task
     
-    def create_audio(self, audio_url: str):
-        logging.info(f"Creating download task for URL: {audio_url}")
-        audio_id: str = self.parse_video_id(audio_url)
+    def create_audio(self, audio_id: str):
         audio = Audio(id=audio_id, status="CREATED")
         self._db.add(audio)
         self._db.commit()
@@ -229,6 +229,33 @@ class AudioService:
         #         self.move_file_in_drive(file_id)
         # self.update_audio(audio_id, "UPLOADED")
         # self.delete_audio(audio_id)
+
+    def save_uploaded_file(self, upload_file: UploadFile) -> dict:
+        """Save an uploaded file to the specified destination."""
+        try:
+            # Save the uploaded file
+            audio_id: str = generate_id(prefix="AUDIO")
+            extension: str = os.path.splitext(upload_file.filename)[1]
+            audio_dir: str = os.path.join(config.DATA_DIR, "audio", audio_id)
+            if not os.path.exists(audio_dir):
+                os.makedirs(audio_dir)
+            file_path = os.path.join(audio_dir, f"{audio_id}{extension}")
+            with open(file_path, "wb") as buffer:
+                shutil.copyfileobj(upload_file.file, buffer)
+        except Exception as e:
+            logging.error(f"There was an error uploading the file: {e}")
+            raise HTTPException(status_code=400, detail="There was an error uploading the file")
+        finally:
+            upload_file.file.close()
+        return {"audio_id": audio_id, "audio_file_path": file_path}
+    
+    def process_uploaded_file(self, upload_file: UploadFile) -> None:
+        logging.info(f"Processing uploaded file: {upload_file.filename}")
+        result = self.save_uploaded_file(upload_file)
+        audio_id: str = result['audio_id']
+        audio_path: str = result['audio_file_path']
+        self.create_audio(audio_id)
+        self.slice_audio(audio_id, audio_path)
 
     def delete_audio(self, audio_id: str) -> None:
         logging.info(f"Deleting audio with ID: {audio_id}")

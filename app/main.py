@@ -19,11 +19,12 @@ from app.helpers import (
 import logging
 
 setup_logging()
-Base.metadata.create_all(bind=engine)
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    logging.info("Starting application...")
+    Base.metadata.create_all(bind=engine)
     logging.info("Checking database connection...")
     if is_db_ready():
         logging.info("Database is ready")

@@ -61,4 +61,4 @@ def submit_transcript(
     return audio_url, task_id
 
 def get_current_user() -> str:
-    return "USER-cbba65c0-beb4-4fc0-8041-0f8640b1c444"
+    return "USER-2d5cecd0-b021-438f-a458-61087673b56a"

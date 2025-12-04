@@ -27,3 +27,41 @@
     outline: none;
     font-size: 1rem;
 }
+
+.separator{
+    text-align: center;
+    margin: 20px 0;
+    font-size: 1.2rem;
+    color: var(--color-text);
+    font-weight: 600;
+}
+
+.card {
+    text-align: center;
+    padding: 20px;
+    /* border: 2px solid #faa301; */
+    border-radius: 10px;
+    /* max-width: 500px; */
+    width: 100%;
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.file-label {
+    display: inline-block;
+    padding: 12px 24px;
+    color: #FFFFFF;
+    background: var(--color-gradient);
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+.file-label:hover {
+    background-color: #73ec10;
+}
+
+#upload{
+    display: none;
+}

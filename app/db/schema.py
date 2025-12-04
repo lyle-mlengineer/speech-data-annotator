@@ -1,4 +1,4 @@
-from sqlalchemy import String, create_engine, DateTime, ForeignKey, Float, Text
+from sqlalchemy import String, create_engine, DateTime, ForeignKey, Float, Text, Integer
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
 from datetime import datetime, timezone
 
@@ -60,5 +60,26 @@ class Transcription(Base):
     gender: Mapped[str] = mapped_column(String, index=True)
     speaker: Mapped[str] = mapped_column(String, index=True)
     keep: Mapped[str] = mapped_column(String, index=True)
+    date_created: Mapped[datetime] = mapped_column(DateTime, default=datetime.now(timezone.utc))
+    date_updated: Mapped[datetime] = mapped_column(DateTime, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
+
+
+class Speaker(Base):
+    __tablename__ = "speakers"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    name: Mapped[str] = mapped_column(String, index=True)
+    description: Mapped[str] = mapped_column(String, nullable=True)
+    dialect: Mapped[str] = mapped_column(String, index=True)
+    use: Mapped[str] = mapped_column(String, nullable=True)
+    date_created: Mapped[datetime] = mapped_column(DateTime, default=datetime.now(timezone.utc))
+    date_updated: Mapped[datetime] = mapped_column(DateTime, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
+
+class Language(Base):
+    __tablename__ = "languages"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True)
+    name: Mapped[str] = mapped_column(String, index=True)
+    abbreviation: Mapped[str] = mapped_column(String, index=True)
     date_created: Mapped[datetime] = mapped_column(DateTime, default=datetime.now(timezone.utc))
     date_updated: Mapped[datetime] = mapped_column(DateTime, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
