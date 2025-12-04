@@ -36,11 +36,44 @@
                      </select>
                   </div>
 
-                  <button class="generate-btn" type="submit">
+                  <div class="select-wrapper">
+                     <select name="speaker" id="" class="custom-select" required>
+                        <option value="abel">Abel</option>
+                        <option value="kingori">Kingori</option>
+                     </select>
+                  </div>
+
+                  <div class="select-wrapper">
+                     <select name="gender" id="" class="custom-select" required>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                     </select>
+                  </div>
+
+                  <div class="select-wrapper">
+                     <select name="keep" id="" class="custom-select" required>
+                        <option value="keep">Keep</option>
+                        <option value="skip">Skip</option>
+                     </select>
+                  </div>
+
+               </div>
+
+               <div class="form-actions">
+                  <button class="next-task-btn btn" id="next-task" type="button">
+                     <i class="fa-solid fa-arrow-right"></i>
+                     Next
+                  </button>
+                  <button class="generate-btn btn" type="submit">
                      <i class="fa-solid fa-wand-sparkles"></i>
                      Submit
                   </button>
-
                </div>
+
 </form>
+{% endblock %}
+
+{% block scripts %}
+        {{ super() }} {# Optional: to include scripts from the parent block if any #}
+        <script src="{{ url_for('static', path='js/transcriber.js') }}"></script>
 {% endblock %}

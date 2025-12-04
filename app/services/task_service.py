@@ -47,9 +47,28 @@ class TaskService:
         )
         return task
     
+    def un_assign_task(self, task_id: str) -> TaskRead | None:
+        task = self.get_task(task_id)
+        if not task:
+            return None
+        task.user_id = None
+        task.status = "CREATED"
+        self._db.commit()
+        self._db.refresh(task)
+        task = TaskRead(
+            id=task.id,
+            status=task.status,
+            date_created=task.date_created,
+            date_updated=task.date_updated,
+            audio_id=task.audio_id,
+            user_id=task.user_id,
+            fileid=task.fileid
+        )
+        return task
+    
     def get_available_task(self) -> TaskRead | None:
         """Get the first task with `status` = `CREATED`. Order by date added."""
-        task = self._db.query(Task).filter(Task.status == "CREATED").first()
+        task = self._db.query(Task).filter(Task.status == "CREATED").order_by(Task.date_created).first()
         if not task:
             return None
         task = TaskRead(

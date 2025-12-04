@@ -9,7 +9,8 @@ from app.ui.v1.helpers import (
     get_task_service, 
     get_transcription_service, 
     TaskService, 
-    TranscriptionService
+    TranscriptionService,
+    get_current_user
 )
 from app.services.utils import get_audio_service, AudioService
 from typing import Annotated
@@ -20,6 +21,8 @@ templates = Jinja2Templates(directory=config.TEMPLATES_DIR)
 
 router = APIRouter(
     tags=["User Interface"],)
+
+USER_ID: str = "USER-cbba65c0-beb4-4fc0-8041-0f8640b1c444"
 
 @router.get('/', status_code=status.HTTP_200_OK, response_class=HTMLResponse)
 async def get_landing_page(request: Request):
@@ -64,10 +67,10 @@ async def download_audio(
 @router.get('/speech_to_text', status_code=status.HTTP_200_OK, response_class=HTMLResponse)
 async def get_speech_to_text_page(
     request: Request,
-    service: TaskService = Depends(get_task_service)
+    user_id: Annotated[str, Depends(get_current_user)],
+    service: TaskService = Depends(get_task_service),
     ):
     """Load the speech to text page"""
-    user_id: str = "USER-2d5cecd0-b021-438f-a458-61087673b56a"
     logging.info("Transcribing audio")
     audio_url, task_id = assign_task(user_id=user_id, service=service, request=request)
     return templates.TemplateResponse(
@@ -86,18 +89,25 @@ async def transcribe_audio(
     audio_id: Annotated[str, Form()], 
     language: Annotated[str, Form()],
     transcription: Annotated[str, Form()],
+    gender: Annotated[str, Form()],
+    speaker: Annotated[str, Form()],
     request: Request,
+    keep: Annotated[str, Form()],
+    user_id: Annotated[str, Depends(get_current_user)],
     task_service: TaskService = Depends(get_task_service),
     transcription_service: TranscriptionService = Depends(get_transcription_service)
     ):
     """Load the speech to text page"""
-    user_id: str = "USER-2d5cecd0-b021-438f-a458-61087673b56a"
+    print(f"Audio ID: {audio_id}, Language: {language}, Transcription: {transcription}, Gender: {gender}, Speaker: {speaker}, Keep: {keep}")
     logging.info("Submitting transcription")
     audio_url, task_id = submit_transcript(
         audio_id=audio_id, 
         user_id=user_id, 
         transcript=transcription, 
         language=language, 
+        gender=gender,
+        speaker=speaker,
+        keep=keep,
         service=transcription_service,
         task_service=task_service,
         request=request

@@ -28,7 +28,10 @@ class TranscriptionService:
             task_id=transcript.task_id,
             user_id=transcript.user_id,
             transcript=transcript.transcript,
-            language=transcript.language
+            language=transcript.language,
+            gender=transcript.gender,
+            speaker=transcript.speaker,
+            keep=transcript.keep
         )
         self._db.add(new_transcript)
         self._db.commit()

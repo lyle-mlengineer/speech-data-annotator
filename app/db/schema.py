@@ -47,6 +47,7 @@ class Task(Base):
     date_updated: Mapped[datetime] = mapped_column(DateTime, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
     # duration: Mapped[float] = mapped_column(Float)
     fileid: Mapped[str] = mapped_column(String, nullable=True)
+    # assigned_at: Mapped[datetime] = mapped_column(DateTime, nullable=True)
     
 class Transcription(Base):
     __tablename__ = "transcriptions"
@@ -56,5 +57,8 @@ class Transcription(Base):
     user_id: Mapped[str] = mapped_column(String, ForeignKey("users.id", ondelete="CASCADE"), nullable=True)
     transcript: Mapped[str] = mapped_column(Text, default="")
     language: Mapped[str] = mapped_column(String, index=True)
+    gender: Mapped[str] = mapped_column(String, index=True)
+    speaker: Mapped[str] = mapped_column(String, index=True)
+    keep: Mapped[str] = mapped_column(String, index=True)
     date_created: Mapped[datetime] = mapped_column(DateTime, default=datetime.now(timezone.utc))
     date_updated: Mapped[datetime] = mapped_column(DateTime, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))

@@ -218,17 +218,17 @@ class AudioService:
         audio_id: str = download_result['audio_id']
         audio_file_path: str = download_result['audio_file_path']
         self.slice_audio(audio_id, audio_file_path)
-        audio_dir: str = os.path.join(self.data_dir, audio_id)
-        service: TaskService = TaskService(session=self._db)
-        for file in os.listdir(audio_dir):
-            if file.endswith(".wav"):
-                file_path = os.path.join(audio_dir, file)
-                file_id = self.upload_to_google_drive(file_path)
-                task_id = file.split(".")[0]
-                service.update_task(task_id=task_id, fileid=file_id)
-                self.move_file_in_drive(file_id)
-        self.update_audio(audio_id, "UPLOADED")
-        self.delete_audio(audio_id)
+        # audio_dir: str = os.path.join(self.data_dir, audio_id)
+        # service: TaskService = TaskService(session=self._db)
+        # for file in os.listdir(audio_dir):
+        #     if file.endswith(".wav"):
+        #         file_path = os.path.join(audio_dir, file)
+        #         file_id = self.upload_to_google_drive(file_path)
+        #         task_id = file.split(".")[0]
+        #         service.update_task(task_id=task_id, fileid=file_id)
+        #         self.move_file_in_drive(file_id)
+        # self.update_audio(audio_id, "UPLOADED")
+        # self.delete_audio(audio_id)
 
     def delete_audio(self, audio_id: str) -> None:
         logging.info(f"Deleting audio with ID: {audio_id}")

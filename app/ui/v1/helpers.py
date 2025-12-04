@@ -28,9 +28,9 @@ def parse_task(
         service: TaskService,
         background_tasks: BackgroundTasks = BackgroundTasks()):
     audio_path: str = os.path.join("audio", task.audio_id, f"{task.id}.wav")
-    if not os.path.exists(audio_path):
-        # background_tasks.add_task(service.download_audio, (task.fileid, task.audio_id, task.id))
-        service.download_audio(file_id=task.fileid, audio_id=task.audio_id, task_id=task.id)
+    # if not os.path.exists(audio_path):
+    #     # background_tasks.add_task(service.download_audio, (task.fileid, task.audio_id, task.id))
+    #     service.download_audio(file_id=task.fileid, audio_id=task.audio_id, task_id=task.id)
     audio_url: str = request.url_for("data", path=audio_path).__str__()
     return audio_url, task.id
 
@@ -39,12 +39,26 @@ def submit_transcript(
     user_id: str,
     transcript: str, 
     language: str,
+    gender: str,
+    speaker: str,
+    keep: str,
     request: Request,
     service: TranscriptionService = Depends(get_transcription_service),
     task_service: TaskService = Depends(get_task_service)
     ) -> TranscriptRead:
-    transcript: TranscriptCreate = TranscriptCreate(task_id=audio_id, user_id=user_id, transcript=transcript, language=language)
+    transcript: TranscriptCreate = TranscriptCreate(
+        task_id=audio_id, 
+        user_id=user_id, 
+        transcript=transcript, 
+        language=language,
+        gender=gender,
+        speaker=speaker,
+        keep=keep
+    )
     transcript = service.create_transcript(transcript=transcript)
     service.update_task(task_id=audio_id, task_service=task_service)
     audio_url, task_id = assign_task(user_id=user_id, request=request, service=task_service)
     return audio_url, task_id
+
+def get_current_user() -> str:
+    return "USER-cbba65c0-beb4-4fc0-8041-0f8640b1c444"

@@ -6,6 +6,7 @@ load_dotenv()
 
 
 class Config(BaseSettings):
+    ENV: str = os.getenv("ENV", "development")
     app_name: str = "SautiFlow Labs"
     debug: bool = False
 
@@ -20,7 +21,7 @@ class Config(BaseSettings):
     )
     
     # DATA_DIR: str = "/home/lyle/datasets/audio/maongezi"
-    DATA_DIR: str = "app/api/v1/data"
+    DATA_DIR: str = "app/api/v1/data" 
 
     GOOGLE_DRIVE_FOLDER_ID: str = "161MWUwPv6O0wpmCB3Il6wasQ4L0dStOF"
     GOOGLE_DRIVE_CREDENTIALS: str = "/home/lyle/.drive/credentials.json"
@@ -36,7 +37,10 @@ class Config(BaseSettings):
 
     @property
     def db_url(self):
-        return f"postgresql+psycopg2://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_HOST}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
+        if self.ENV == "development":
+            return f"postgresql+psycopg2://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@localhost:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
+        elif self.ENV == "production":
+            return f'postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@ep-still-forest-aho47jlh-pooler.c-3.us-east-1.aws.neon.tech/{self.POSTGRES_DB}?sslmode=require&channel_binding=require'
 
 
 config = Config()

@@ -20,6 +20,9 @@ class Transcript(BaseModel):
 
 class TranscriptCreate(Transcript):
     transcript: str
+    gender: str
+    speaker: str
+    keep: str
     
     @staticmethod
     def from_orm(transcript):
@@ -28,7 +31,10 @@ class TranscriptCreate(Transcript):
             task_id=transcript.task_id, 
             user_id=transcript.user_id,
             transcript=transcript.transcript,
-            language=transcript.language
+            language=transcript.language,
+            gender=transcript.gender,
+            speaker=transcript.speaker,
+            keep=transcript.keep
             )
 
 class TranscriptRead(Transcript):
@@ -43,7 +49,10 @@ class TranscriptRead(Transcript):
             user_id=transcript.user_id,
             date_created=transcript.date_created,
             date_updated=transcript.date_updated,
-            language=transcript.language
+            language=transcript.language,
+            gender=transcript.gender,
+            speaker=transcript.speaker,
+            keep=transcript.keep
             )
         
 class TranscriptUpdate(Transcript):

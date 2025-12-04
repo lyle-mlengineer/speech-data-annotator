@@ -6,19 +6,24 @@
 }
 
 .audio-input .audio-btn{
-    padding: 10px 20px;
+    padding: 20px 20px;
     border-radius: 5px;
     color: #FFFFFF;
     background: var(--color-gradient);
-    cursor: pointer;
+    cursor: pointer; 
+    width: 15%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .audio-input .audio-url{
-    padding: 10px 20px;
+    padding: 20px 20px;
     border-radius: 5px;
     border: 1px solid var(--color-border);
     color: var(--color-text);
     background: var(--color-input);
     flex-grow: 1;
     outline: none;
+    font-size: 1rem;
 }

@@ -42,3 +42,11 @@ def delete_task(task_id: str, service: TaskService = Depends(get_task_service)):
     if not success:
         raise HTTPException(status_code=404, detail="task not found")
     return {"success": True}
+
+
+@router.patch("/tasks/{task_id}/unassign", response_model=TaskRead)
+def unassign_task(task_id: str, service: TaskService = Depends(get_task_service)):
+    task = service.un_assign_task(task_id)
+    if not task:
+        raise HTTPException(status_code=404, detail="task not found")
+    return task
