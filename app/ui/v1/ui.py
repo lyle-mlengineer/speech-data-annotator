@@ -22,8 +22,6 @@ templates = Jinja2Templates(directory=config.TEMPLATES_DIR)
 router = APIRouter(
     tags=["User Interface"],)
 
-USER_ID: str = "USER-cbba65c0-beb4-4fc0-8041-0f8640b1c444"
-
 @router.get('/', status_code=status.HTTP_200_OK, response_class=HTMLResponse)
 async def get_landing_page(request: Request):
     """Load the home page"""
