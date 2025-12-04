@@ -35,6 +35,8 @@ class Config(BaseSettings):
     MAX_AUDIO_DURATION_SECONDS: int = 30  # 15 minutes
     MIN_AUDIO_DURATION_SECONDS: int = 10  # 5 seconds
 
+    TASKS_PRE_LOAD: int = os.getenv("TASKS_PRE_LOAD", 5)
+
     @property
     def db_url(self):
         if self.ENV == "development":

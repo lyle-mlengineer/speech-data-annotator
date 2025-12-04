@@ -7,6 +7,9 @@ from app.models.task import TaskRead
 import json
 import os
 from app.core.config import config
+import logging
+from app.services.audio_service import AudioService
+from app.services.task_service import TaskService
 
 class TranscriptionService:
     def __init__(self, session: Session) -> None:
@@ -37,7 +40,18 @@ class TranscriptionService:
         self._db.commit()
         self._db.refresh(new_transcript)
         self.save_transcript_locally(new_transcript)
+        self.delete_audio(new_transcript.task_id)
         return TranscriptRead.from_orm(new_transcript)
+    
+    def delete_audio(self, task_id: str) -> None:
+        logging.info(f"Deleting the task with id: {task_id}. It has been transcribed!")
+        task_service = TaskService(session=self._db)
+        task = task_service.get_task(task_id=task_id)
+        if task:
+            audio_id = task.audio_id
+            # audio_service = AudioService(session=self._db)
+            # audio_service.delete_audio(audio_id)
+            logging.info(f"Deleted the audio with id: {audio_id}")
     
     def update_task(self, task_id: str, task_service: TaskService) -> TaskRead | None:
         task = task_service.update_task(task_id, "COMPLETED")

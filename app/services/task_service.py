@@ -97,7 +97,8 @@ class TaskService:
                 status=task.status,
                 date_created=task.date_created,
                 date_updated=task.date_updated,
-                audio_id=task.audio_id
+                audio_id=task.audio_id,
+                fileid=task.fileid
             ) for task in tasks
         ]
         
@@ -111,6 +112,13 @@ class TaskService:
             .limit(limit)
             .all()
         )
+    
+    def un_assign_tasks(self):
+        tasks = self._db.query(Task).filter(Task.status == "ASSIGNED").all()
+        for task in tasks:
+            task.status = "CREATED"
+            self._db.commit()
+            self._db.refresh(task)    
         
     def list_completed_tasks(self, offset: int = 0, limit: int = 10) -> list[Task]:
         """List completed tasks and oredr by date added."""
@@ -222,7 +230,6 @@ class TaskService:
         """Download an audio file from Google Drive to the specified destination path."""
         logging.info(f"Downloading audio file with ID {file_id} from Google Drive")
         try:
-            print(file_id)
             audio_dir: str = os.path.join(config.DATA_DIR, 'audio', audio_id)
             if not os.path.exists(audio_dir):
                 os.makedirs(audio_dir)
@@ -230,3 +237,15 @@ class TaskService:
             self.drive.download_file(file_id=file_id, file_path=destination_path)
         except Exception as e:
             raise RuntimeError(f"Failed to download file from Google Drive: {e}")
+
+    def preload_tasks(self) -> None:
+        logging.info("Preloading tasks")
+        tasks = self.list_unassigned_tasks(limit=config.TASKS_PRE_LOAD)
+        for task in tasks:
+            audio_id = task.audio_id
+            task_id = task.id
+            audio_dir: str = os.path.join(config.DATA_DIR, 'audio', audio_id)
+            destination_path: str = os.path.join(audio_dir, f"{task_id}.wav")
+            if not os.path.exists(destination_path):
+                logging.info(f"Downloading audio file with ID {task.fileid} from Google Drive")
+                self.download_audio(file_id=task.fileid, audio_id=task.audio_id, task_id=task.id)
