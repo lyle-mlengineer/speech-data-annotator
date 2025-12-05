@@ -60,6 +60,7 @@ class Transcription(Base):
     gender: Mapped[str] = mapped_column(String, index=True)
     speaker: Mapped[str] = mapped_column(String, index=True)
     keep: Mapped[str] = mapped_column(String, index=True)
+    fileid: Mapped[str] = mapped_column(String, nullable=True)
     date_created: Mapped[datetime] = mapped_column(DateTime, default=datetime.now(timezone.utc))
     date_updated: Mapped[datetime] = mapped_column(DateTime, default=datetime.now(timezone.utc), onupdate=datetime.now(timezone.utc))
 

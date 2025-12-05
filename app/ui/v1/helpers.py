@@ -14,10 +14,11 @@ from app.core.config import config
 def assign_task(
         user_id: str, 
         request: Request, 
-        service: TaskService = Depends(get_task_service)
+        service: TaskService = Depends(get_task_service),
+        background_tasks: BackgroundTasks = BackgroundTasks()
         ) -> str:
     task: TaskRead = service.get_and_assign_task(user_id=user_id)
-    print(f"Assigned task: {task}") # Debugging line to check the task assignment
+    background_tasks.add_task(service.setup_next_task)
     if not task:
         return "", ""
     return parse_task(task=task, request=request, service=service)
@@ -59,6 +60,29 @@ def submit_transcript(
     service.update_task(task_id=audio_id, task_service=task_service)
     audio_url, task_id = assign_task(user_id=user_id, request=request, service=task_service)
     return audio_url, task_id
+
+def process_transcript(
+    audio_id: str, 
+    user_id: str,
+    transcript: str, 
+    language: str,
+    gender: str,
+    speaker: str,
+    keep: str,
+    service: TranscriptionService = Depends(get_transcription_service),
+    task_service: TaskService = Depends(get_task_service)
+) -> None:
+    transcript: TranscriptCreate = TranscriptCreate(
+        task_id=audio_id, 
+        user_id=user_id, 
+        transcript=transcript, 
+        language=language,
+        gender=gender,
+        speaker=speaker,
+        keep=keep
+    )
+    service.process_transcript(transcript)
+    service.update_task(task_id=audio_id, task_service=task_service)
 
 def get_current_user() -> str:
     return "USER-2d5cecd0-b021-438f-a458-61087673b56a"

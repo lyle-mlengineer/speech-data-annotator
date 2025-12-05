@@ -65,6 +65,21 @@ class TaskService:
             fileid=task.fileid
         )
         return task
+
+    def setup_next_task(self):
+        logging.info("Setting up next task")
+        task = self.get_available_task()
+        if not task:
+            return None
+        audio_id = task.audio_id
+        task_id = task.id
+        audio_dir: str = os.path.join(config.DATA_DIR, 'audio', audio_id)
+        destination_path: str = os.path.join(audio_dir, f"{task_id}.wav")
+        if not os.path.exists(destination_path):
+            logging.info(f"Downloading audio file with ID {task.fileid} from Google Drive")
+            self.download_audio(file_id=task.fileid, audio_id=task.audio_id, task_id=task.id)
+        else:
+            logging.info(f"Audio file with ID {task.fileid} already exists")
     
     def get_available_task(self) -> TaskRead | None:
         """Get the first task with `status` = `CREATED`. Order by date added."""

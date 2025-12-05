@@ -56,4 +56,5 @@ class TranscriptRead(Transcript):
             )
         
 class TranscriptUpdate(Transcript):
-    transcript: str
+    transcript: str | None = None
+    fileid: str | None = None

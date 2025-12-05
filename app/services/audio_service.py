@@ -158,7 +158,7 @@ class AudioService:
         except Exception as e:
             raise RuntimeError(f"Failed to upload file to Google Drive: {e}")
         
-    def move_file_in_drive(self, file_id: str, destination_folder_id: str = config.GOOGLE_DRIVE_FOLDER_ID) -> None:
+    def move_file_in_drive(self, file_id: str, destination_folder_id: str = config.GOOGLE_DRIVE_AUDIO_FOLDER_ID) -> None:
         """Move a file in Google Drive to a different folder."""
         try:
             self.drive.move_file(file_id, destination_folder_id)

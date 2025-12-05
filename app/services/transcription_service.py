@@ -10,10 +10,15 @@ from app.core.config import config
 import logging
 from app.services.audio_service import AudioService
 from app.services.task_service import TaskService
+from oryks_google_drive import GoogleDrive
+from oryks_google_drive.mime_types import MimeType
+
 
 class TranscriptionService:
     def __init__(self, session: Session) -> None:
         self._db = session
+        self.drive = GoogleDrive()
+        self.drive.authenticate_from_credentials(config.GOOGLE_DRIVE_CREDENTIALS)
 
     def save_transcript_locally(self, transcript: TranscriptCreate):
         transcript_path = os.path.join(config.DATA_DIR, "transcripts", transcript.id + ".json")
@@ -24,6 +29,27 @@ class TranscriptionService:
                 "language": transcript.language
             }
             json.dump(data, f, indent=4)
+
+    def delete_transcript_locally(self, transcript_id: str):
+        logging.info(f"Deleting transcript with id: {transcript_id}")
+        transcript_path = os.path.join(config.DATA_DIR, "transcripts", transcript_id + ".json")
+        os.remove(transcript_path)
+        logging.info(f"Deleted transcript with id: {transcript_id}")
+
+    def upload_transcript_to_drive(self, transcript: TranscriptCreate):
+        transcript_path = os.path.join(config.DATA_DIR, "transcripts", transcript.id + ".json")
+        try:
+            file = self.drive.upload_file(file_path=transcript_path, mime_type=MimeType.APPLICATION_JSON.value)
+        except Exception as e:
+            raise RuntimeError(f"Failed to upload transcript to Google Drive: {e}")
+        return file.get("id", "")
+    
+    def move_file_in_drive(self, file_id: str, destination_folder_id: str = config.GOOGLE_DRIVE_TRANSCRIPS_FOLDER_ID) -> None:
+        """Move a file in Google Drive to a different folder."""
+        try:
+            self.drive.move_file(file_id, destination_folder_id)
+        except Exception as e:
+            raise RuntimeError(f"Failed to move file in Google Drive: {e}")
         
     def create_transcript(self, transcript: TranscriptCreate) -> TranscriptRead:
         new_transcript = Transcription(
@@ -39,8 +65,6 @@ class TranscriptionService:
         self._db.add(new_transcript)
         self._db.commit()
         self._db.refresh(new_transcript)
-        self.save_transcript_locally(new_transcript)
-        self.delete_audio(new_transcript.task_id)
         return TranscriptRead.from_orm(new_transcript)
     
     def delete_audio(self, task_id: str) -> None:
@@ -89,13 +113,23 @@ class TranscriptionService:
         self._db.commit()
         return TranscriptRead.from_orm(transcript)
         
-    def update_transcript(self, transcript_id: str, transcript: TranscriptUpdate) -> TranscriptRead | None:
+    def update_transcript(self, transcript_id: str, transcript_update: TranscriptUpdate) -> TranscriptRead | None:
         transcript = self._db.query(Transcription).filter(Transcription.id == transcript_id).first()
         if not transcript:
             return None
-        transcript.transcript = transcript.transcript
+        if transcript_update.transcript:
+            transcript.transcript = transcript_update.transcript
+        if transcript_update.fileid:
+            transcript.fileid = transcript_update.fileid
         self._db.commit()
         self._db.refresh(transcript)
         return TranscriptRead.from_orm(transcript)
     
-    
+    def process_transcript(self, transcript: TranscriptCreate) -> None:
+        new_transcript: TranscriptRead = self.create_transcript(transcript)
+        self.save_transcript_locally(new_transcript)
+        self.delete_audio(new_transcript.task_id)
+        file_id: str = self.upload_transcript_to_drive(transcript)
+        self.move_file_in_drive(file_id)
+        self.delete_transcript_locally(new_transcript.id)
+        self.update_transcript(TranscriptUpdate(fileid=file_id))
